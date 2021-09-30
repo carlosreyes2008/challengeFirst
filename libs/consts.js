@@ -1,7 +1,7 @@
 module.exports = {
-    port: 3000,
+    port: 3001,
     super: {
-        email: 'prometeus@master.com',
+        email: 'master@master.com',
         password: 'bWFzdGVy',
         role: 'super',
         name: 'super user',

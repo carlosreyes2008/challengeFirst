@@ -3,7 +3,7 @@ const {teams, teams_users, users, teams_accounts, accounts} = require('../models
 
 exports.Create = async function(req, res){
     const { team } = req.body;
-    const { Authorization } = req.headers;
+    const { token:Authorization } = req.headers;
 
     try{
         var decoded = await tokens.VerifyToken(Authorization);
@@ -13,23 +13,24 @@ exports.Create = async function(req, res){
 
     if(decoded ===  undefined || !decoded){
         res.status(401).json({
-                operation : 'fail',
+                success: false,
                 message: 'Invalid Token'
             });
+        return;
     }
 
     try{
         var result = await teams.create({...team});
     }catch(err){
         res.status(400).json({
-            operation : 'fail',
+            success: false,
             message: 'Error while creating new team',
             error: err.original.errno,
         });
     }
 
     res.json({
-        operation : 'success',
+        success: true,
         message: 'Team created successfully',
         team: result
     });
@@ -40,14 +41,14 @@ exports.List = async function(req, res){
         var result = await teams.findAll();
     }catch(e){
         res.status(400).json({
-            operation : 'fail',
+            success: false,
             message: 'Error while fetching teams',
             error: err.original.errno,
         });
     }
 
     res.json({
-        operation : 'success',
+        success: true,
         message: 'Teams fetched successfully',
         teams: result,
     });
@@ -64,22 +65,22 @@ exports.Find = async function(req, res){
             });
     }catch(e){
         res.status(400).json({
-            operation : 'fail',
+            success: false,
             message: 'Error while fetching team',
             error: err.original.errno,
         });
     }
 
     res.json({
-        operation : 'success',
+        success: true,
         message: 'Team fetched successfully',
-        teams: result,
+        team: result,
     });
 }
 
 exports.Update = async function(req, res){
     const {team} = req.body;
-    const { Authorization } = req.headers;
+    const { token:Authorization } = req.headers;
 
     try{
         var decoded = await tokens.VerifyToken(Authorization);
@@ -89,9 +90,10 @@ exports.Update = async function(req, res){
 
     if(decoded ===  undefined || !decoded){
         res.status(401).json({
-                operation : 'fail',
+                success: false,
                 message: 'Invalid Token'
             });
+        return;
     }
 
     try{
@@ -100,14 +102,14 @@ exports.Update = async function(req, res){
         }});
     }catch(err){
         res.status(400).json({
-            operation : 'fail',
+            success: false,
             message: 'Error while updating team',
             error: err,
         });
     }
     
     res.json({
-        operation : 'success',
+        success: true,
         message: 'Team updated successfully',
         result: result
     });
@@ -115,7 +117,7 @@ exports.Update = async function(req, res){
 
 exports.Remove = async function(req, res){
     const { teamId } = req.params;
-    const { Authorization } = req.headers;
+    const { token:Authorization } = req.headers;
 
     try{
         var decoded = await tokens.VerifyToken(Authorization);
@@ -125,23 +127,24 @@ exports.Remove = async function(req, res){
 
     if(decoded ===  undefined || !decoded){
         res.status(401).json({
-                operation : 'fail',
+                success: false,
                 message: 'Invalid Token'
             });
+        return;
     }
 
     try{
         var result = await teams.destroy({where: { id : teamId}});
     }catch(err){
         res.status(400).json({
-            operation : 'fail',
+            success: false,
             message: 'Error while removing teams',
             error: err,
         });
     }
     
     res.json({
-        operation : 'success',
+        success: true,
         message: 'Teams removed successfully',
         result: result
     });
@@ -149,7 +152,7 @@ exports.Remove = async function(req, res){
 
 exports.JoinUsers = async function(req, res){
     const { users } = req.body;
-    const { Authorization } = req.headers;
+    const { token:Authorization } = req.headers;
 
     try{
         var decoded = await tokens.VerifyToken(Authorization);
@@ -159,23 +162,24 @@ exports.JoinUsers = async function(req, res){
 
     if(decoded ===  undefined || !decoded){
         res.status(401).json({
-                operation : 'fail',
+                success: false,
                 message: 'Invalid Token'
             });
+        return;
     }
 
     try{
         var result = await teams_users.bulkCreate(users);
     }catch(err){
         res.status(400).json({
-            operation : 'fail',
+            success: false,
             message: 'Error while joining users to team',
             error: err,
         });
     }
 
     res.json({
-        operation : 'success',
+        success: true,
         message: 'Users join to team successfully',
         users: result
     });
@@ -183,7 +187,7 @@ exports.JoinUsers = async function(req, res){
 
 exports.ExcludeUsers = async function(req, res){
     const {userId, teamId} = req.params;
-    const { Authorization } = req.headers;
+    const { token:Authorization } = req.headers;
 
     try{
         var decoded = await tokens.VerifyToken(Authorization);
@@ -193,31 +197,32 @@ exports.ExcludeUsers = async function(req, res){
 
     if(decoded ===  undefined || !decoded){
         res.status(401).json({
-                operation : 'fail',
+                success: false,
                 message: 'Invalid Token'
             });
+        return;
     }
 
     try{
         var result = await teams_users.destroy({where: { teams_id: teamId, users_id : userId}});
     }catch(err){
         res.status(400).json({
-            operation : 'fail',
+            success: false,
             message: 'Error while excluding users from team',
             error: err,
         });
     }
     
     res.json({
-        operation : 'success',
+        success: true,
         message: 'Users excluded from team successfully',
         result: result
     });
 }
 
 exports.JoinAccount = async function(req, res){
-    const {account} = req.body;
-    const { Authorization } = req.headers;
+    const { accounts } = req.body;
+    const { token:Authorization } = req.headers;
 
     try{
         var decoded = await tokens.VerifyToken(Authorization);
@@ -227,31 +232,32 @@ exports.JoinAccount = async function(req, res){
 
     if(decoded ===  undefined || !decoded){
         res.status(401).json({
-                operation : 'fail',
+                success: false,
                 message: 'Invalid Token'
             });
+        return;
     }
 
     try{
-        var result = await teams_accounts.create(account);
+        var result = await teams_accounts.bulkCreate(accounts);
     }catch(err){
         res.status(400).json({
-            operation : 'fail',
+            success: false,
             message: 'Error while joining team to account',
             error: err.original.errno,
         });
     }
 
     res.json({
-        operation : 'success',
-        message: 'Team join to account successfully',
-        users: result
+        success: true,
+        message: 'Team join to accounts successfully',
+        accounts: result
     });
 }
 
 exports.ExcludeAccount = async function(req, res){
     const {accountId, teamId} = req.params;
-    const { Authorization } = req.headers;
+    const { token:Authorization } = req.headers;
 
     try{
         var decoded = await tokens.VerifyToken(Authorization);
@@ -261,23 +267,24 @@ exports.ExcludeAccount = async function(req, res){
 
     if(decoded ===  undefined || !decoded){
         res.status(401).json({
-                operation : 'fail',
+                success: false,
                 message: 'Invalid Token'
             });
+        return;
     }
 
     try{
         var result = await teams_accounts.destroy({where: { teams_id : teamId, accounts_id : accountId}});
     }catch(err){
         res.status(400).json({
-            operation : 'fail',
+            success: false,
             message: 'Error while excluding account from team',
             error: err,
         });
     }
     
     res.json({
-        operation : 'success',
+        success: true,
         message: 'Account excluded from team successfully',
         result: result
     });

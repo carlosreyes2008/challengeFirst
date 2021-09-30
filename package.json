@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js",
+    "front": "cd frontend & npm start",
     "test": "jest"
   },
   "keywords": [],

@@ -3,7 +3,7 @@ const {accounts, teams} = require('../models');
 
 exports.Create = async function(req, res){
     const { account } = req.body;
-    const{ Authorization } = req.headers;
+    const{ token:Authorization } = req.headers;
 
     try{
         var decoded = await tokens.VerifyToken(Authorization);
@@ -13,23 +13,24 @@ exports.Create = async function(req, res){
 
     if(decoded ===  undefined || !decoded){
         res.status(401).json({
-                operation : 'fail',
+                success: false,
                 message: 'Invalid Token'
             });
+        return;
     }
 
     try{
         var result = await accounts.create(account);
     }catch(e){
         res.status(400).json({
-            operation : 'fail',
+            success: false,
             message: 'Error while creating new team',
             error: err.original.errno,
         });
     }
 
     res.json({
-        operation : 'success',
+        success: true,
         message: 'Account created successfully',
         account: result
     });
@@ -40,14 +41,14 @@ exports.List = async function(req, res){
         var result = await accounts.findAll();
     }catch(err){
         res.status(400).json({
-            operation : 'fail',
+            success: false,
             message: 'Error while fetching accounts',
             error: err,
         });
     }
 
     res.json({
-        operation : 'success',
+        success: true,
         message: 'Accounts fetched successfully',
         accounts: result,
     });
@@ -61,14 +62,14 @@ exports.Find = async function(req, res){
             include: [{model: teams, as: 'teams'}] });
     }catch(e){
         res.status(400).json({
-            operation : 'fail',
+            success: false,
             message: 'Error while fetching Account',
             error: err,
         });
     }
 
     res.json({
-        operation : 'success',
+        success: true,
         message : 'Account fetched successfully',
         account : result,
     });
@@ -76,7 +77,7 @@ exports.Find = async function(req, res){
 
 exports.Update = async function(req, res){
     const {account} = req.body;
-    const{ Authorization } = req.headers;
+    const{ token:Authorization } = req.headers;
 
     try{
         var decoded = await tokens.VerifyToken(Authorization);
@@ -86,9 +87,10 @@ exports.Update = async function(req, res){
 
     if(decoded ===  undefined || !decoded){
         res.status(401).json({
-                operation : 'fail',
+                success: false,
                 message: 'Invalid Token'
             });
+        return;
     }
 
     try{
@@ -97,14 +99,14 @@ exports.Update = async function(req, res){
         }});
     }catch(err){
         res.status(400).json({
-            operation : 'fail',
+            success: false,
             message: 'Error while updating account',
             error: err,
         });
     }
     
     res.json({
-        operation : 'success',
+        success: true,
         message: 'Account updated successfully',
         result: result
     });
@@ -112,7 +114,7 @@ exports.Update = async function(req, res){
 
 exports.Remove = async function(req, res){
     const { accountId } = req.params;
-    const{ Authorization } = req.headers;
+    const{ token:Authorization } = req.headers;
 
     try{
         var decoded = await tokens.VerifyToken(Authorization);
@@ -122,23 +124,24 @@ exports.Remove = async function(req, res){
 
     if(decoded ===  undefined || !decoded){
         res.status(401).json({
-                operation : 'fail',
+                success: false,
                 message: 'Invalid Token'
             });
+        return;
     }
 
     try{
         var result = await accounts.destroy({where: { id : accountId}});
     }catch(err){
         res.status(400).json({
-            operation : 'fail',
+            success: false,
             message: 'Error while removing accounts',
             error: err,
         });
     }
     
     res.json({
-        operation : 'success',
+        success: true,
         message: 'Accounts removed successfully',
         result: result
     });

@@ -14,11 +14,13 @@ exports.Login = async function(req, res){
     switch(result){
         case undefined:
             res.status(400).json({
+                success : false,
                 message: 'Error fetching data'
             });
             break;
         case null:
             res.status(404).json({
+                success : false,
                 message: 'User not found'
             });
             break;
@@ -28,16 +30,20 @@ exports.Login = async function(req, res){
         var token = await tokens.NewToken(result);
     }catch(e){
         res.status(400).json({
+            success : false,
             message: 'Unable to sing token'
         });
     }
 
-    res.json({token});
+    res.json({
+        success : true,
+        token: token
+    });
 }
 
 exports.Create = async function(req, res){
     const { user } = req.body;
-    const { Authorization } = req.headers;
+    const { token:Authorization } = req.headers;
 
     try{
         var decoded = await tokens.VerifyToken(Authorization);
@@ -47,9 +53,10 @@ exports.Create = async function(req, res){
 
     if(decoded ===  undefined || !decoded){
         res.status(401).json({
-                operation : 'fail',
+                success : false,
                 message: 'Invalid Token'
             });
+        return;
     }
 
     try{
@@ -57,12 +64,12 @@ exports.Create = async function(req, res){
     }catch(err){
         if(err.original.errno === 1062){
             res.status(409).json({
-                operation : 'fail',
-                message: 'User e-mail already exists in DB',
+                success : false,
+                message: 'User e-mail already exists',
             });
         }else{
             res.status(400).json({
-                operation : 'fail',
+                success : false,
                 message: 'Error while creating new user',
                 error: err.original.errno,
             });
@@ -70,7 +77,7 @@ exports.Create = async function(req, res){
     }
 
     res.json({
-        operation : 'success',
+        success : true,
         message: 'User created successfully',
         user: result
     });
@@ -87,14 +94,15 @@ exports.List = async function(req, res){
         });
     }catch(err){
         res.status(400).json({
-            operation : 'fail',
+            success : false,
             message: 'Error while fetching users',
             error: err,
         });
     }
 
     res.json({
-        operation : 'success',
+        success : true,
+        message: 'Users fetched successfully',
         users: result,
     });
 }
@@ -107,6 +115,7 @@ exports.Find = async function(req, res){
             include: [{model: teams, as: 'teams'}] });
     }catch(e){
         res.status(400).json({
+            success : false,
             operation : 'fail',
             message: 'Error while fetching user',
             error: err,
@@ -115,20 +124,21 @@ exports.Find = async function(req, res){
 
     if(result === null){
         res.status(404).json({
+            success : false,
             operation : 'fail',
             message: 'User not found',
         });
     }
 
     res.json({
-        operation : 'success',
+        success : true,
         user: result,
     });
 }
 
 exports.Remove = async function(req, res){
     const { userId } = req.params;
-    const { Authorization } = req.headers;
+    const { token:Authorization } = req.headers;
 
     try{
         var decoded = await tokens.VerifyToken(Authorization);
@@ -138,31 +148,33 @@ exports.Remove = async function(req, res){
 
     if(decoded ===  undefined || !decoded){
         res.status(401).json({
+                success : false,
                 operation : 'fail',
                 message: 'Invalid Token'
             });
+        return;
     }
 
     try{
         var result = await users.destroy({where: { id : userId}});
     }catch(err){
         res.status(400).json({
-            operation : 'fail',
+            success : false,
             message: 'Error while removing users',
             error: err,
         });
     }
     
     res.json({
-        operation : 'success',
+        success : true,
         message: 'Users removed successfully',
         result: result
     });
 }
 
 exports.Update = async function(req, res){
-    const {user } = req.body;
-    const { Authorization } = req.headers;
+    const { user } = req.body;
+    const { token:Authorization } = req.headers;
 
     try{
         var decoded = await tokens.VerifyToken(Authorization);
@@ -172,9 +184,10 @@ exports.Update = async function(req, res){
 
     if(decoded ===  undefined || !decoded){
         res.status(401).json({
-                operation : 'fail',
+                success : false,
                 message: 'Invalid Token'
             });
+        return;
     }
 
     try{
@@ -183,14 +196,14 @@ exports.Update = async function(req, res){
         }});
     }catch(err){
         res.status(400).json({
-            operation : 'fail',
+            success : false,
             message: 'Error while updating user',
             error: err,
         });
     }
     
     res.json({
-        operation : 'success',
+        success : true,
         message: 'User updated successfully',
         result: result
     });
